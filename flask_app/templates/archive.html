@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewShare</title>
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet'
+        integrity='sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD' crossorigin='anonymous'>
+    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js'
+        integrity='sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN'
+        crossorigin='anonymous'></script>
+</head>
+
+<body class="bg-dark">
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Welcome {{session['first_name']}}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                {% if session['id'] != archive.id %}
+                <div class="navbar-nav mb-2 mb-lg-0">
+                    <a class="nav-link" href="/archive/{{session['id']}}">MyArchive</a>
+                </div>
+                {% endif %}
+                <div class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <a class="nav-link" href="/dashboard">NewSearch</a>
+                </div>
+                <a class="text-decoration-none" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <div id="newsfeed" class="container col-md-12 p-3">
+        <div class="container text-center m-5">
+            <h1 class="text-primary">{{archive.first_name}} {{archive.last_name}}'s Archive </h1>
+        </div>
+        <div class="container d-flex">
+            <div class="container col-md-9">
+                {% if user.posts|length == 0 %}
+                <div class="card">
+                    <img src="{{ url_for('static', filename='/css/images/empty.gif') }}" class="card-img-top"
+                        alt="city night">
+                    <div class="card-body">
+                        <h5 class="card-title">No articles saved in your Archive</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Save articles you want to read at a later time in your
+                            archive.</h6>
+                    </div>
+                </div>
+                {% else %}
+                {% for post in user.posts %}
+                <div id='mainpic' class="mb-5 test">
+                    <form class="form_archive">
+                        <div class="card">
+                            <img src="{{post.image}}" class="card-img-top" alt="{{post.title}}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{post.title}}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">Source: {{post.source}}</h6>
+                                <h6 class="card-subtitle mb-2 text-muted">{{post.description}}</h6>
+                                <h6 class="card-subtitle mb-2 text-muted"><a href="{{post.url}}">Link to original
+                                        article</a>
+                                </h6>
+                                <h6 class="card-subtitle mb-2 text-muted"> Published on: {{post.published_date}}</h6>
+                            </div>
+                        </div>
+                        <input type="hidden" name="id" value="{{post.id}}">
+                        {% if session['id'] == archive.id %}
+                        <div class="btnremove">
+                            <button type="submit" class="btn btn-danger m-2 btnreset">Remove from Archive</button>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div class="container col-md-3">
+                <table class="table table-light table-striped table-hover align-middle">
+                    <thead class="table-dark text-light table-bordered border-primary ">
+                        <tr>
+                            <th>Followers</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if followed|length == 0 %}
+                        <tr>
+                            <td>None yet...</td>
+                        </tr>
+                        {% else %}
+                        {% for follower in followed %}
+                        <tr>
+                            <td>{{follower.follower_fname}} {{follower.follower_lname}}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+                <table class="table table-light table-striped table-hover align-middle">
+                    <thead class="table-dark text-light table-bordered border-primary ">
+                        <tr>
+                            <th>Following</th>
+                            {% if session['id'] == archive.id %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if follower|length == 0 %}
+                        <tr>
+                            <td>None yet...</td>
+                            {% if session['id'] == archive.id %}
+                            <td></td>
+                            {% endif %}
+                        </tr>
+                        {% else %}
+                        {% for followed in follower %}
+                        <tr>
+                            <td>{{followed.followed_fname}} {{followed.followed_lname}}</td>
+                            {% if session['id'] == archive.id %}
+                            <td>
+                                <a href="/archive/{{followed.followed_id}}"><button class="btn btn-primary btn-sm"
+                                        type="submit">View Archive</button></a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='/js/archive.js') }}"></script>
+    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js'
+        integrity='sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN'
+        crossorigin='anonymous'></script>
+</body>
+
+</html>
